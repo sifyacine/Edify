@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import 'features/main/account/account_page.dart';
 import 'features/main/home_page/home_page.dart';
-import 'features/main/notification/notification_page.dart';
 import 'features/main/shorts/shorts.dart';
 import 'features/main/wishlist/wishlist.dart';
+import 'features/personalization/account/account_page.dart';
+import 'features/personalization/notification/notification_page.dart';
 
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});
@@ -19,20 +19,43 @@ class NavigationMenu extends StatelessWidget {
     final controller = Get.put(NavigationController());
     return Scaffold(
       bottomNavigationBar: Obx(
-        () => NavigationBar(
-          height: 74,
+        () => BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           backgroundColor: isDark ? TColors.dark : TColors.light,
+          currentIndex: controller.selectedIndex.value,
+          onTap: (index) {
+            controller.selectedIndex.value = index;
+          },
+          showSelectedLabels: false,
+          // Hides the label for selected item
+          showUnselectedLabels: false,
+          // Hides the label for unselected items
+          selectedItemColor: TColors.primary,
+          // Changes the color of selected item
+          unselectedItemColor: isDark ? Colors.white : Colors.grey,
+          // Color for unselected items
           elevation: 0,
-          selectedIndex: controller.selectedIndex.value,
-          onDestinationSelected: (index) =>
-              controller.selectedIndex.value = index,
-          destinations: const [
-            NavigationDestination(icon: Icon(Iconsax.home), label: 'Home'),
-            NavigationDestination(icon: Icon(Iconsax.heart), label: 'Wishlist'),
-            NavigationDestination(icon: Icon(Iconsax.video), label: 'Shorts'),
-            NavigationDestination(icon: Icon(Iconsax.notification), label: 'Notification'),
-            NavigationDestination(icon: Icon(Iconsax.user), label: 'Account'),
-
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Iconsax.home),
+              label: '', // No label
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Iconsax.heart),
+              label: '', // No label
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Iconsax.video),
+              label: '', // No label
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Iconsax.notification),
+              label: '', // No label
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Iconsax.user),
+              label: '', // No label
+            ),
           ],
         ),
       ),
@@ -47,7 +70,7 @@ class NavigationController extends GetxController {
   final screens = [
     const HomeScreen(),
     const WishlistScreen(),
-    const ShortsScreen(),
+    ShortsPage(),
     const NotificationsScreen(),
     const AccountScreen(),
   ];

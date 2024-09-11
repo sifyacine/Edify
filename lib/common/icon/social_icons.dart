@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../utils/constants/colors.dart';
-import '../../../utils/constants/image_strings.dart';
 import '../../../utils/constants/sizes.dart';
 
 class TSocialButtons extends StatelessWidget {
   const TSocialButtons({
-  super.key, required this.image,
+    super.key,
+    required this.image,
   });
   final String image;
 
@@ -17,13 +16,13 @@ class TSocialButtons extends StatelessWidget {
       decoration: BoxDecoration(
           border: Border.all(color: TColors.grey),
           borderRadius: BorderRadius.circular(100)),
-      child:Image(
-          width: TSizes.iconMd,
-          height: TSizes.iconMd,
-          image: AssetImage(
-            image,
-          ),
+      child: Image(
+        width: TSizes.iconMd,
+        height: TSizes.iconMd,
+        image: AssetImage(
+          image,
         ),
+      ),
     );
   }
 }

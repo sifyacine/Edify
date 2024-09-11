@@ -24,44 +24,83 @@ class HomeScreen extends StatelessWidget {
                 builder: (BuildContext context) {
                   return Container(
                     height: MediaQuery.of(context).size.height * 0.15,
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            GestureDetector(
-                              onTap: () {},
-                              child: Row(
-                                children: [
-                                  Icon(Iconsax.document),
-                                  Text("post"),
-                                ],
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                color: TColors.grey,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Iconsax.document),
+                                      SizedBox(width: 8),
+                                      Text("Post"),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                            Row(
-                              children: [
-                                Icon(Iconsax.document),
-                                Text("post"),
-                              ],
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                color: TColors.grey,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Iconsax.document),
+                                      SizedBox(width: 8),
+                                      Text("Live"),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Row(
                           children: [
-                            Row(
-                              children: [
-                                Icon(Iconsax.document),
-                                Text("post"),
-                              ],
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                color: TColors.grey,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Iconsax.document),
+                                      SizedBox(width: 8),
+                                      Text("Short"),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                            Row(
-                              children: [
-                                Icon(Iconsax.document),
-                                Text("post"),
-                              ],
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                color: TColors.grey,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Iconsax.document),
+                                      SizedBox(width: 8),
+                                      Text("Course"),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -100,150 +139,141 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            children: [
-              /// create post Field
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                color: isDark ? Colors.black : Colors.white,
-                width: double.infinity,
-                child: const Row(
+      body: ListView(
+        children: [
+          /// Create post field
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            color: isDark ? Colors.black : Colors.white,
+            width: double.infinity,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage:
+                      AssetImage("assets/images/content/user.png"),
+                    ),
+                    SizedBox(width: 12.0),
+                    Text("What's in your mind?"),
+                  ],
+                ),
+                Icon(Iconsax.image),
+              ],
+            ),
+          ),
+
+          /// Posts
+          const PostContainer(
+            shares: 3,
+            profileImage: 'assets/images/content/user.png',
+            userName: 'Sif Yacine',
+            date: '1d',
+            postDetails:
+            "Flutter is an open-source UI software development toolkit created by Google. It allows developers to build natively compiled applications for mobile, web, and desktop from a single codebase...",
+            postImage: 'assets/images/content/post_image.png',
+            likes: 12,
+            comments: 5,
+          ),
+          const PostContainer(
+            shares: 3,
+            profileImage: 'assets/images/content/user.png',
+            userName: 'Sif Yacine',
+            date: '1d',
+            postDetails:
+            "Flutter is an open-source UI software development toolkit created by Google. It allows developers to build natively compiled applications for mobile, web, and desktop from a single codebase...",
+            postImage: 'assets/images/content/post_image.png',
+            likes: 12,
+            comments: 5,
+          ),
+
+          /// Suggested courses
+          Container(
+            color: isDark ? Colors.black : Colors.white,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: Column(
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage:
-                              AssetImage("assets/images/content/user.png"),
-                        ),
-                        SizedBox(width: 12.0),
-                        Text("What's in your mind?"),
-                      ],
+                    Text(
+                      "Top courses in Development",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    Icon(Iconsax.image),
+                    TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "view all",
+                          style: TextStyle(color: TColors.primary),
+                        )),
                   ],
                 ),
-              ),
-
-              /// Post
-              const PostContainer(
-                shares: 3,
-                profileImage: 'assets/images/content/user.png',
-                userName: 'Sif Yacine',
-                date: '1d',
-                postDetails:
-                    "Flutter is an open-source UI software development toolkit created by Google. It allows developers to build natively compiled applications for mobile, web, and desktop from a single codebase. Key features of Flutter include: Widgets: Flutter uses a rich set of pre-designed widgets that allow developers to create complex UIs easily...",
-                postImage: 'assets/images/content/post_image.png',
-                likes: 12,
-                comments: 5,
-              ),
-              const PostContainer(
-                shares: 3,
-                profileImage: 'assets/images/content/user.png',
-                userName: 'Sif Yacine',
-                date: '1d',
-                postDetails:
-                    "Flutter is an open-source UI software development toolkit created by Google. It allows developers to build natively compiled applications for mobile, web, and desktop from a single codebase. Key features of Flutter include: Widgets: Flutter uses a rich set of pre-designed widgets that allow developers to create complex UIs easily...",
-                postImage: 'assets/images/content/post_image.png',
-                likes: 12,
-                comments: 5,
-              ),
-
-              /// suggested courses
-              Container(
-                color: isDark ? Colors.black : Colors.white,
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Top courses in Development",
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        TextButton(
-                            onPressed: () {},
-                            child: const Text(
-                              "view all",
-                              style: TextStyle(color: TColors.primary),
-                            )),
-                      ],
-                    ),
-                    const SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      // Enable horizontal scrolling
-
-                      child: Row(
-                        children: [
-                          CourseCard(
-                              thumbnail: 'assets/images/content/post_image.png',
-                              title: 'learn flutter fast',
-                              instructor: 'Sif Yacine',
-                              price: 4200,
-                              promo: 10,
-                              rating: 4.8,
-                              rateNum: 15),
-                          SizedBox(width: 12.0),
-                          CourseCard(
-                              thumbnail:
-                                  'assets/images/content/java_course.png',
-                              title: 'python for beginners',
-                              instructor: 'Karim',
-                              price: 3800,
-                              promo: 10,
-                              rating: 3.5,
-                              rateNum: 27),
-                          SizedBox(width: 12.0),
-                          CourseCard(
-                              thumbnail:
-                                  'assets/images/content/python_course.png',
-                              title: 'your guid for java',
-                              instructor: 'Othman ',
-                              price: 6800,
-                              promo: 10,
-                              rating: 2.5,
-                              rateNum: 16),
-                          SizedBox(width: 12.0),
-                        ],
-                      ),
-                    ),
-                  ],
+                const SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      CourseCard(
+                          thumbnail: 'assets/images/content/post_image.png',
+                          title: 'Learn Flutter fast',
+                          instructor: 'Sif Yacine',
+                          price: 4200,
+                          promo: 10,
+                          rating: 4.8,
+                          rateNum: 15),
+                      SizedBox(width: 12.0),
+                      CourseCard(
+                          thumbnail: 'assets/images/content/java_course.png',
+                          title: 'Python for Beginners',
+                          instructor: 'Karim',
+                          price: 3800,
+                          promo: 10,
+                          rating: 3.5,
+                          rateNum: 27),
+                      SizedBox(width: 12.0),
+                      CourseCard(
+                          thumbnail: 'assets/images/content/python_course.png',
+                          title: 'Your Guide for Java',
+                          instructor: 'Othman',
+                          price: 6800,
+                          promo: 10,
+                          rating: 2.5,
+                          rateNum: 16),
+                      SizedBox(width: 12.0),
+                    ],
+                  ),
                 ),
-              ),
-              const PostContainer(
-                profileImage: 'assets/images/content/user.png',
-                userName: 'Sif Yacine',
-                date: '1d',
-                postDetails:
-                    "Flutter is an open-source UI software development toolkit created by Google. It allows developers to build natively compiled applications for mobile, web, and desktop from a single codebase. Key features of Flutter include: Widgets: Flutter uses a rich set of pre-designed widgets that allow developers to create complex UIs easily...",
-                postImage: 'assets/images/content/post_image.png',
-                likes: 12,
-                comments: 5,
-                shares: 3,
-              ),
-              const PostContainer(
-                profileImage: 'assets/images/content/user.png',
-                userName: 'Sif Yacine',
-                date: '1d',
-                postDetails:
-                    "Flutter is an open-source UI software development toolkit created by Google. It allows developers to build natively compiled applications for mobile, web, and desktop from a single codebase. Key features of Flutter include: Widgets: Flutter uses a rich set of pre-designed widgets that allow developers to create complex UIs easily...",
-                postImage: 'assets/images/content/post_image.png',
-                likes: 12,
-                comments: 5,
-                shares: 3,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+
+          /// More posts
+          const PostContainer(
+            profileImage: 'assets/images/content/user.png',
+            userName: 'Sif Yacine',
+            date: '1d',
+            postDetails:
+            "Flutter is an open-source UI software development toolkit created by Google...",
+            postImage: 'assets/images/content/post_image.png',
+            likes: 12,
+            comments: 5,
+            shares: 3,
+          ),
+          const PostContainer(
+            profileImage: 'assets/images/content/user.png',
+            userName: 'Sif Yacine',
+            date: '1d',
+            postDetails:
+            "Flutter is an open-source UI software development toolkit created by Google...",
+            postImage: 'assets/images/content/post_image.png',
+            likes: 12,
+            comments: 5,
+            shares: 3,
+          ),
+        ],
       ),
     );
   }
