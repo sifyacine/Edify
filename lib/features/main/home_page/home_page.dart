@@ -1,9 +1,11 @@
 import 'package:edify/features/main/home_page/widgets/course_card.dart';
 import 'package:edify/features/main/home_page/widgets/post_container.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/helpers/helper_functions.dart';
+import '../../personalization/controllers/user_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,6 +13,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
+    final userController = Get.find<UserController>();
+
     return Scaffold(
       backgroundColor: isDark ? TColors.dark : TColors.light,
       appBar: AppBar(
@@ -123,12 +127,14 @@ class HomeScreen extends StatelessWidget {
         ],
         title: GestureDetector(
           onTap: () {},
-          child: const Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Welcome, Yacine Sif",
-                style: TextStyle(fontSize: 16.0),
+              Obx(
+              () => Text(
+                  "Welcome, ${userController.userLastName.value + " " + userController.userFirstName.value}",
+                  style: TextStyle(fontSize: 16.0),
+                ),
               ),
               SizedBox(height: 2.0),
               Text(
@@ -146,14 +152,15 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             color: isDark ? Colors.black : Colors.white,
             width: double.infinity,
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage:
-                      AssetImage("assets/images/content/user.png"),
+                      backgroundImage: userController.userProfilePicture.value.isNotEmpty
+                          ? NetworkImage(userController.userProfilePicture.value)
+                          : AssetImage("assets/images/content/user.png") as ImageProvider,
                     ),
                     SizedBox(width: 12.0),
                     Text("What's in your mind?"),

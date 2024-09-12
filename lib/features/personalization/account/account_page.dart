@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../common/tiles/custom_tile.dart';
+import '../../../data/repositories/authentication/authentication_repository.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/helpers/helper_functions.dart';
 
@@ -11,7 +12,7 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
-
+    final controller = AuthenticationRepository.instance;
     return Scaffold(
       backgroundColor: isDark ? TColors.black : TColors.light,
       appBar: AppBar(
@@ -148,7 +149,7 @@ class AccountScreen extends StatelessWidget {
               child: Column(
                 children: [
                   TextButton(
-                    onPressed: (){},
+                    onPressed: (){controller.logout();},
                     child: Text("Sign out", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0, color: TColors.primary)),
                   ),
                   Text("Edify v1.0.0"),

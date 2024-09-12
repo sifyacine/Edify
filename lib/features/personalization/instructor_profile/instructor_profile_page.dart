@@ -3,14 +3,12 @@ import 'package:iconsax/iconsax.dart';
 import 'package:readmore/readmore.dart';
 
 import '../../../../../utils/constants/colors.dart';
-import '../../../utils/helpers/helper_functions.dart';
 
 class InstructorProfilePage extends StatelessWidget {
   const InstructorProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = THelperFunctions.isDarkMode(context);
     return DefaultTabController(
       length: 3, // Number of tabs
       child: Scaffold(

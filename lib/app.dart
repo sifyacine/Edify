@@ -3,7 +3,7 @@ import 'package:edify/utils/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 
-import 'navigation_menu.dart';
+import 'features/authentication/screens/signin/signin_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -17,7 +17,7 @@ class App extends StatelessWidget {
       darkTheme: TAppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
       // initialBinding: GeneralBindings(),
-      home: NavigationMenu(),
+      home: LoginScreen(),
     );
   }
 }

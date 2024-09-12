@@ -58,5 +58,7 @@ class TValidator {
     return null;
   }
 
+  static validateEmptyText(String s, String? value) {}
+
 // Add more custom validators as needed for your specific requirements.
 }
