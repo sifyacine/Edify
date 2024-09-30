@@ -9,40 +9,12 @@ class SignUpForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final signUpController = Get.put(SignUpController()); // Initialize controller
+    final signUpController = Get.find<SignUpController>(); // Use Get.find() to get the controller
 
     return Form(
       key: signUpController.signUpFormKey,
       child: Column(
         children: [
-          // First and Last Name
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: signUpController.firstName,
-                  decoration: const InputDecoration(
-                    labelText: 'First Name',
-                    prefixIcon: Icon(Iconsax.user),
-                  ),
-                  validator: (value) => value!.isEmpty ? 'First name is required' : null,
-                ),
-              ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: TextFormField(
-                  controller: signUpController.lastName,
-                  decoration: const InputDecoration(
-                    labelText: 'Last Name',
-                    prefixIcon: Icon(Iconsax.user),
-                  ),
-                  validator: (value) => value!.isEmpty ? 'Last name is required' : null,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16.0),
-
           // Username
           TextFormField(
             controller: signUpController.username,

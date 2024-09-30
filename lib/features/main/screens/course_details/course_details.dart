@@ -3,8 +3,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../../utils/constants/colors.dart';
-import '../../../utils/helpers/helper_functions.dart';
-import '../../personalization/instructor_profile/instructor_profile_page.dart';
+import '../../../../utils/helpers/helper_functions.dart';
+import '../../../personalization/screens/instructor_profile/instructor_profile_page.dart';
 import '../ratings_reviews/widgets/rating_progress_indicator.dart';
 
 class CourseDetails extends StatelessWidget {

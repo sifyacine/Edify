@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../utils/helpers/network_manager.dart';
 import '../../../../utils/loaders/loaders.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../screens/signup/verify_email.dart';
 
 class SignUpController extends GetxController {
-  final firstName = TextEditingController();
-  final lastName = TextEditingController();
   final username = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   final termsAndConditions = false.obs;
   GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
+  final Dio _dio = Dio();
+
 
   Future<void> signUp() async {
     if (!signUpFormKey.currentState!.validate()) {
-      TLoaders.errorSnackBar(title: 'Validation Error', message: 'Please fill in all fields correctly.');
+      TLoaders.errorSnackBar(
+        title: 'Validation Error',
+        message: 'Please fill in all fields correctly.',
+      );
       return;
     }
 
@@ -35,74 +35,140 @@ class SignUpController extends GetxController {
     }
 
     try {
-      TFullScreenLoader.openLoadingDialog("Signing you up...", "assets/images/animations/loader-animation.json");
+      TFullScreenLoader.openLoadingDialog(
+        "Signing you up...",
+        "assets/images/animations/loader-animation.json",
+      );
 
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
         TFullScreenLoader.stopLoading();
-        TLoaders.errorSnackBar(title: 'No Internet', message: 'Please check your internet connection.');
+        TLoaders.errorSnackBar(
+          title: 'No Internet',
+          message: 'Please check your internet connection.',
+        );
         return;
       }
 
       final signUpData = {
-        'first_name': firstName.text.trim(),
-        'last_name': lastName.text.trim(),
         'username': username.text.trim(),
         'email': email.text.trim(),
         'password': password.text.trim(),
       };
 
-      final dio = Dio();
-      dio.options.headers['Content-Type'] = 'application/json';
+      _dio.options.headers['Content-Type'] = 'application/json';
 
-      // Sign up the user
-      final response = await dio.post(
-        'http://127.0.0.1:8000/authentication/register/', // Adjust URL if needed
+      // Send the registration request
+      final response = await _dio.post(
+        'https://edify-jicc8.ondigitalocean.app/auth/register/',
         data: signUpData,
-        options: Options(validateStatus: (status) => status! < 500),
       );
 
+      TFullScreenLoader.stopLoading();
+
       if (response.statusCode == 201) {
-        // User created successfully, now create the member record
-        final userId = response.data['id']; // Assuming the user ID is returned
+        final userData = response.data;
 
-        final memberData = {
-          'user_id': userId,
-          'profile_picture': '', // Optionally handle file uploads or defaults
-          'about_me': '',
-          'is_instructor': false,
-          'num_followers': 0,
-          'num_reviews': 0,
-          'num_courses': 0,
-          'general_rating': 0.0,
-        };
-
-        final memberResponse = await dio.post(
-          'http://127.0.0.1:8000/member/create_member/', // Adjust URL if needed
-          data: memberData,
-          options: Options(validateStatus: (status) => status! < 500),
-        );
-
-        if (memberResponse.statusCode == 201) {
-          TFullScreenLoader.stopLoading();
-          Get.off(() => const VerifyEmailScreen());
+        // If the API response contains a token
+        if (userData.containsKey('token')) {
+          Get.to(() => VerifyEmailScreen(email: userData['email'],));
         } else {
-          TFullScreenLoader.stopLoading();
-          TLoaders.errorSnackBar(
-            title: 'Member Creation Failed',
-            message: memberResponse.data['error'] ?? 'An error occurred while creating the member.',
-          );
+          // Handle case where token isn't returned, only email verification is needed
+          Get.to(() => VerifyEmailScreen(email: userData['email'],));
         }
+
+        TLoaders.successSnackBar(
+          title: 'Sign Up Successful',
+          message: 'Please check your email for verification instructions.',
+        );
       } else {
-        TFullScreenLoader.stopLoading();
         TLoaders.errorSnackBar(
-          title: 'Sign-Up Failed',
-          message: response.data['error'] ?? 'An error occurred during sign-up.',
+          title: 'Sign Up Failed',
+          message: 'Something went wrong. Please try again.',
         );
       }
-    } catch (e) {
+    } on DioException catch (e) {
       TFullScreenLoader.stopLoading();
-      TLoaders.errorSnackBar(title: 'Sign-Up Error', message: e.toString());
+      if (e.response != null && e.response!.statusCode == 400) {
+        TLoaders.errorSnackBar(
+          title: 'Sign Up Error',
+          message: 'Email or username already exists.',
+        );
+      } else {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'An unexpected error occurred.',
+        );
+      }
     }
   }
+
+  Future<void> resendVerificationEmail() async {
+    try {
+      TFullScreenLoader.openLoadingDialog(
+        "Resending email...",
+        "assets/images/animations/loader-animation.json",
+      );
+
+      final isConnected = await NetworkManager.instance.isConnected();
+      if (!isConnected) {
+        TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'No Internet',
+          message: 'Please check your internet connection.',
+        );
+        return;
+      }
+
+      // Get the access token from storage (e.g., SharedPreferences)
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
+
+      if (accessToken == null) {
+        TFullScreenLoader.stopLoading();
+        TLoaders.errorSnackBar(
+          title: 'Authentication Error',
+          message: 'Please log in again.',
+        );
+        return;
+      }
+
+      // Add authorization token to headers
+      _dio.options.headers['Authorization'] = 'Bearer $accessToken';
+      _dio.options.headers['Content-Type'] = 'application/json';
+
+      // Send the request to resend the verification email
+      final response = await _dio.post(
+        'https://edify-jicc8.ondigitalocean.app/auth/resend-verification/',
+      );
+
+      TFullScreenLoader.stopLoading();
+
+      if (response.statusCode == 200) {
+        TLoaders.successSnackBar(
+          title: 'Email Sent',
+          message: 'Verification email has been resent successfully.',
+        );
+      } else {
+        TLoaders.errorSnackBar(
+          title: 'Resend Failed',
+          message: 'Could not resend verification email. Please try again.',
+        );
+      }
+    } on DioException catch (e) {
+      TFullScreenLoader.stopLoading();
+      if (e.response != null && e.response!.statusCode == 400) {
+        TLoaders.errorSnackBar(
+          title: 'Resend Error',
+          message: e.response!.data['error'] ?? 'An unexpected error occurred.',
+        );
+      } else {
+        TLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'An unexpected error occurred. Please try again.',
+        );
+      }
+    }
+  }
+
 }

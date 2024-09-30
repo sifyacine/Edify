@@ -3,14 +3,12 @@ import '../../../data/repositories/user/user_repository.dart';
 import '../../../utils/loaders/loaders.dart';
 
 class UserController extends GetxController {
-  static UserController get instance => Get.find(); // Singleton pattern for accessing the controller
+  static UserController get instance => Get.find();
 
   // Observable properties
   var userEmail = ''.obs;
   var userUsername = ''.obs;
-  var userFirstName = ''.obs;
-  var userLastName = ''.obs;
-  var userPhoneNumber = ''.obs;
+  var userFullName = ''.obs;
   var userProfilePicture = ''.obs;
   var userAboutMe = ''.obs;
   var userIsInstructor = false.obs;
@@ -18,6 +16,14 @@ class UserController extends GetxController {
   var userNumReviews = 0.obs;
   var userNumCourses = 0.obs;
   var userGeneralRating = 0.0.obs;
+
+  // Observable lists for posts, shorts, courses, and saved items
+  var myPosts = <String>[].obs;
+  var myShorts = <String>[].obs;
+  var myCourses = <String>[].obs;
+  var savedPosts = <String>[].obs;
+  var savedShorts = <String>[].obs;
+  var savedCourses = <String>[].obs;
 
   /// Fetch user record by username
   Future<void> fetchUserRecord(String username) async {
@@ -27,30 +33,31 @@ class UserController extends GetxController {
       final userResponse = await userRepository.fetchUser(username);
 
       if (userResponse != null) {
-
-        print(userResponse);
-        // Update the email observable for UI tracking
+        // Update observable properties with user data
         userEmail.value = userResponse.email;
         userUsername.value = userResponse.username;
-        userFirstName.value = userResponse.firstName;
-        userLastName.value = userResponse.lastName;
-        userPhoneNumber.value = userResponse.phoneNumber?? "";
-        userProfilePicture.value = userResponse.profilePicture?? "";
-        userAboutMe.value = userResponse.aboutMe ?? "";
+        userFullName.value = userResponse.fullName ?? '';
+        userProfilePicture.value = userResponse.profilePic ?? '';
+        userAboutMe.value = userResponse.aboutMe ?? '';
         userIsInstructor.value = userResponse.isInstructor;
         userNumFollowers.value = userResponse.numFollowers;
         userNumReviews.value = userResponse.numReviews;
         userNumCourses.value = userResponse.numCourses;
         userGeneralRating.value = userResponse.generalRating;
 
+        // Update lists with user data
+        myPosts.assignAll(userResponse.myPosts ?? []);
+        myShorts.assignAll(userResponse.myShorts ?? []);
+        myCourses.assignAll(userResponse.myCourses ?? []);
+        savedPosts.assignAll(userResponse.savedPosts ?? []);
+        savedShorts.assignAll(userResponse.savedShorts ?? []);
+        savedCourses.assignAll(userResponse.savedCourses ?? []);
 
-        // Notify success
         TLoaders.successSnackBar(
           title: "Data Fetched",
           message: "User information has been successfully fetched.",
         );
       } else {
-        print("User data is null");
         TLoaders.warningSnackBar(
           title: "No Data",
           message: "User data is empty.",

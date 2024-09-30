@@ -8,13 +8,18 @@ import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/constants/text_strings.dart';
 import '../../../../utils/helpers/helper_functions.dart';
+import '../../controller/signup/signup_controller.dart';
 import '../signin/signin_screen.dart';
 
 class VerifyEmailScreen extends StatelessWidget {
-  const VerifyEmailScreen({Key? key}) : super(key: key);
+  final String? email; // Allow email to be nullable
+
+  const VerifyEmailScreen({Key? key, required this.email}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final signUpController = Get.find<SignUpController>(); // Use Get.find() to get the controller
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -29,24 +34,40 @@ class VerifyEmailScreen extends StatelessWidget {
           padding: const EdgeInsets.all(TSizes.defaultSpace),
           child: Column(
             children: [
-              /// image
+              // image
               Image(
-                width: THelperFunctions.screenWidth()*0.6,
+                width: THelperFunctions.screenWidth() * 0.6,
                 image: const AssetImage(
                   TImages.deliveredEmailIllustration,
                 ),
               ),
               const SizedBox(height: TSizes.spaceBtwSections,),
 
-              /// title and subtitle
-              Text( '${TTexts.confirmEmail} ', style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center,),
+              // title and subtitle
+              Text(
+                TTexts.confirmEmail,
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: TSizes.spaceBtwItems,),
-              Text( 'ycn585@gmail.com', style: Theme.of(context).textTheme.labelLarge, textAlign: TextAlign.center,),
+
+              // Show email only if it's not null or empty
+              if (email != null && email!.isNotEmpty)
+                Text(
+                  email!,
+                  style: Theme.of(context).textTheme.labelLarge,
+                  textAlign: TextAlign.center,
+                ),
               const SizedBox(height: TSizes.spaceBtwItems,),
-              Text( TTexts.confirmEmailSubTitle, style: Theme.of(context).textTheme.labelMedium, textAlign: TextAlign.center,),
+
+              Text(
+                TTexts.confirmEmailSubTitle,
+                style: Theme.of(context).textTheme.labelMedium,
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: TSizes.spaceBtwSections,),
 
-              /// buttons
+              // Buttons
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -54,21 +75,23 @@ class VerifyEmailScreen extends StatelessWidget {
                     Get.to(() => SuccessScreen(
                       image: TImages.staticSuccessIllustration,
                       title: TTexts.yourAccountCreatedTitle,
-                      subtitle: TTexts.yourAccountCreatedSubTitle,
+                      subtitle: 'We have sent you an email to ${email ?? 'your registered email address'}',
                       onPressed: () => Get.to(() => const LoginScreen()),
                     ));
-                                    },
+                  },
                   child: const Text(
                     TTexts.tContinue,
                   ),
                 ),
               ),
               const SizedBox(height: TSizes.spaceBtwItems,),
+
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
                   onPressed: () {
-                    Get.to(() => const VerifyEmailScreen());
+                    // Logic for resending the email
+                    signUpController.resendVerificationEmail();
                   },
                   child: const Text(
                     TTexts.resendEmail,

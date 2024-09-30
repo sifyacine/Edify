@@ -7,6 +7,8 @@ import 'package:get_storage/get_storage.dart';
 import 'app.dart';
 import 'data/repositories/authentication/authentication_repository.dart';
 import 'data/repositories/user/user_repository.dart';
+import 'features/authentication/controller/signup/signup_controller.dart';
+import 'features/main/controller/posts/posts_controller.dart';
 import 'features/personalization/controllers/user_controller.dart'; // Import UserRepository
 
 Future<void> main() async {
@@ -21,6 +23,7 @@ Future<void> main() async {
 
   // Initialize repositories
   Get.put(UserController());
+  Get.put(SignUpController());
   Get.put(AuthenticationRepository());
   Get.put(NetworkManager());
   Get.put(UserRepository()); // User repository initialization

@@ -6,117 +6,179 @@ import '../../../../utils/helpers/network_manager.dart';
 import '../../../../utils/loaders/loaders.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../personalization/controllers/user_controller.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
+import '../../screens/signin/signin_screen.dart';
 
 class LoginController extends GetxController {
-  /// Variables
+  // Variables
   final rememberMe = false.obs;
   final hidePassword = true.obs;
   final localStorage = GetStorage();
   final emailOrUsername = TextEditingController();
   final password = TextEditingController();
   GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
-  final userController = Get.find<UserController>(); // Use Get.find() to get the existing instance
+  final userController = Get.find<UserController>(); // Get existing instance
+  final dio.Dio _dio = dio.Dio();
 
   @override
   void onInit() {
     super.onInit();
-    // Load remembered email
+
+    // Load remembered email if any
     emailOrUsername.text = localStorage.read('REMEMBER_ME_EMAIL') ?? '';
+
+    // Set up Dio interceptors to automatically handle tokens
+    _dio.interceptors.add(dio.InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final accessToken = localStorage.read('auth_token');
+        if (accessToken != null) {
+          options.headers['Authorization'] = 'Bearer $accessToken';
+        }
+        return handler.next(options); // Continue request
+      },
+      onError: (dio.DioError e, handler) async {
+        if (e.response?.statusCode == 401) {
+          final refreshToken = localStorage.read('refresh_token');
+          if (refreshToken != null) {
+            try {
+              final refreshResponse = await _dio.post(
+                'https://edify-jicc8.ondigitalocean.app/auth/token/refresh/',
+                data: {'refresh': refreshToken},
+              );
+
+              if (refreshResponse.statusCode == 200) {
+                final newAccessToken = refreshResponse.data['access'];
+                localStorage.write('auth_token', newAccessToken);
+
+                final opts = e.requestOptions;
+                opts.headers['Authorization'] = 'Bearer $newAccessToken';
+                final cloneReq = await _dio.request(
+                  opts.path,
+                  options: dio.Options(method: opts.method),
+                  data: opts.data,
+                  queryParameters: opts.queryParameters,
+                );
+                return handler.resolve(cloneReq);
+              }
+            } catch (refreshError) {
+              localStorage.remove('auth_token');
+              localStorage.remove('refresh_token');
+              Get.offAll(() => LoginScreen()); // Navigate to login if refresh fails
+            }
+          }
+        }
+        return handler.next(e);
+      },
+    ));
   }
 
-  /// Email or Username and password sign-in
   Future<void> emailOrUsernameAndPasswordSignIn() async {
     if (!loginFormKey.currentState!.validate()) {
-      // Show error if the form is not valid
-      TLoaders.errorSnackBar(title: 'Validation Error', message: 'Please fill in all fields correctly.');
+      TLoaders.errorSnackBar(
+        title: 'Validation Error',
+        message: 'Please fill in all fields correctly.',
+      );
       return;
     }
 
     try {
-      // Show loading screen
-      TFullScreenLoader.openLoadingDialog("Logging you in...", "assets/images/animations/loader-animation.json");
-
-      // Check internet connectivity
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
-        TFullScreenLoader.stopLoading();
-        TLoaders.errorSnackBar(title: 'No Internet', message: 'Please check your internet connection.');
+        TLoaders.errorSnackBar(
+          title: 'No Internet',
+          message: 'Please check your internet connection.',
+        );
         return;
       }
 
-      // Prepare login data
+      // Show loading screen before making network requests
+      TFullScreenLoader.openLoadingDialog(
+        "Logging you in...",
+        "assets/images/animations/loader-animation.json",
+      );
+
       final loginData = {
-        'username': emailOrUsername.text.trim(),
+        'email': emailOrUsername.text.trim(),
         'password': password.text.trim(),
       };
 
-      // Debug: Print login data
-      print('Login Data: $loginData');
-
-      // Send login request
-      final dio = Dio();
-      dio.options.headers['Content-Type'] = 'application/json';
-
-      final response = await dio.post(
-        'http://127.0.0.1:8000/authentication/login/', // Ensure correct URL
+      final dio.Response response = await _dio.post(
+        'https://edify-jicc8.ondigitalocean.app/auth/login/',
         data: loginData,
-        options: Options(validateStatus: (status) => status! < 500), // Allow status codes < 500
       );
 
       if (response.statusCode == 200) {
-        // Extract tokens
-        final authToken = response.data['access'];
-        final refreshToken = response.data['refresh'];
-
-        // Save tokens to local storage
-        localStorage.write('auth_token', authToken);
-        localStorage.write('refresh_token', refreshToken);
-
-        // Fetch user data with the access token
-        final userResponse = await dio.get(
-          'http://127.0.0.1:8000/member/members/${loginData['username']}/',
-          options: Options(
-            headers: {'Authorization': 'Bearer $authToken'},
-          ),
-        );
-
-        if (userResponse.statusCode == 200) {
-          final userCredentials = userResponse.data;
-          print("User Credentials: $userCredentials");
-
-          // Save user data to userController
-          await userController.fetchUserRecord(loginData['username']!);
-
-          // If "Remember Me" is checked, save email and password
-          if (rememberMe.value) {
-            localStorage.write("REMEMBER_ME_EMAIL", emailOrUsername.text.trim());
-            localStorage.write("REMEMBER_ME_PASSWORD", password.text.trim());
-          } else {
-            // Clear the stored values if not remembering
-            localStorage.remove("REMEMBER_ME_EMAIL");
-            localStorage.remove("REMEMBER_ME_PASSWORD");
-          }
-
-          // Stop loader and navigate to the home screen
-          TFullScreenLoader.stopLoading();
-          Get.off(() => const NavigationMenu());
-        } else {
-          TFullScreenLoader.stopLoading();
-          TLoaders.errorSnackBar(title: 'Fetch Error', message: 'Unable to retrieve user data.');
-        }
-      } else {
-        // Login failed, display error
-        TFullScreenLoader.stopLoading();
+        await _handleSuccessfulLogin(response.data);
+      } else if (response.statusCode == 401) {
+        // Handle incorrect email/password
+        final errorMessage = response.data['detail'] ?? 'Incorrect email or password.';
         TLoaders.errorSnackBar(
           title: 'Login Failed',
-          message: response.data['error'] ?? 'Invalid username or password.',
+          message: errorMessage,
+        );
+      } else {
+        // General error
+        TLoaders.errorSnackBar(
+          title: 'Login Failed',
+          message: 'Something went wrong. Please try again.',
         );
       }
     } catch (e) {
+      TLoaders.errorSnackBar(
+        title: 'Unexpected Error',
+        message: 'An error occurred: ${e.toString()}',
+      );
+    } finally {
+      // Ensure the loader stops regardless of success or failure
       TFullScreenLoader.stopLoading();
-      // Handle login error
-      TLoaders.errorSnackBar(title: 'Login Error', message: e.toString());
+    }
+  }
+
+
+  Future<void> _handleSuccessfulLogin(Map<String, dynamic> data) async {
+    final authToken = data['tokens']['access'];
+    final refreshToken = data['tokens']['refresh'];
+
+    if (authToken != null && refreshToken != null && authToken.isNotEmpty && refreshToken.isNotEmpty) {
+      localStorage.write('auth_token', authToken);
+      localStorage.write('refresh_token', refreshToken);
+
+      final dio.Response userResponse = await _dio.get(
+        'https://edify-jicc8.ondigitalocean.app/member/${data['username']}/',
+      );
+
+      if (userResponse.statusCode == 200 && userResponse.data != null) {
+        await userController.fetchUserRecord(userResponse.data['username']);
+        _handleRememberMe();
+
+        // Show success message
+        TLoaders.successSnackBar(
+          title: 'Login Success',
+          message: 'Welcome back!',
+        );
+
+        Get.off(() => const NavigationMenu());
+      } else {
+        TLoaders.errorSnackBar(
+          title: 'User Data Error',
+          message: 'Unable to retrieve user data.',
+        );
+      }
+    } else {
+      TLoaders.errorSnackBar(
+        title: 'Token Error',
+        message: 'Invalid token received.',
+      );
+    }
+  }
+
+  void _handleRememberMe() {
+    if (rememberMe.value) {
+      localStorage.write("REMEMBER_ME_EMAIL", emailOrUsername.text.trim());
+      localStorage.write("REMEMBER_ME_PASSWORD", password.text.trim());
+    } else {
+      localStorage.remove("REMEMBER_ME_EMAIL");
+      localStorage.remove("REMEMBER_ME_PASSWORD");
     }
   }
 }

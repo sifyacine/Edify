@@ -3,8 +3,11 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../features/authentication/screens/onboarding/onboarding_screen.dart';
 import '../../../features/authentication/screens/signin/signin_screen.dart';
+import '../../../features/authentication/screens/signup/verify_email.dart';
 import '../../../navigation_menu.dart';
 import '../../../utils/exceptions/format_exceptions.dart';
 import '../../../utils/exceptions/platform_exceptions.dart';
@@ -12,184 +15,119 @@ import '../../../utils/exceptions/platform_exceptions.dart';
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
 
-  /// Variables
   final deviceStorage = GetStorage();
-  final dio = Dio(); // Using Dio for API requests
-  final baseUrl = 'http://127.0.0.1:8000'; // Your Django API URL
+  final dio = Dio();
+  final baseUrl = 'https://edify-jicc8.ondigitalocean.app';
 
-  /// Check if the user is already authenticated and redirect accordingly
+  /// Determine the appropriate screen to redirect to
   Future<void> screenRedirect() async {
-    final token = deviceStorage.read('auth_token');
-    if (token != null) {
-      // Validate token (Optional: make a call to check token validity)
-      Get.offAll(() => const NavigationMenu());
-    } else {
-      Get.offAll(() => const LoginScreen());
-    }
-  }
-
-  /// Function to log in with email and password
-  Future<void> loginWithEmailAndPassword(String email, String password) async {
     try {
-      final response = await dio.post(
-        '$baseUrl/authentication/login/',
-        data: {
-          'email': email,
-          'password': password,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ),
-      );
+      // Check if it's the first time the user launches the app
+      final isFirstTime = deviceStorage.read("IsFirstTime") ?? true;
+      if (isFirstTime) {
+        deviceStorage.write("IsFirstTime", false);
+        Get.off(() => const OnBoardingScreen());
+        return;
+      }
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        // Save token and user information
-        deviceStorage.write('auth_token', data['access']); // Save token
-        deviceStorage.write('refresh_token', data['refresh']); // Save refresh token if needed
-        deviceStorage.write('user', data['user']); // Save user details
+      // Check if the user is signed in (i.e., access token exists)
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
 
-        // Redirect to main screen
-        Get.offAll(() => const NavigationMenu());
+      if (accessToken != null) {
+        // Fetch user data to check if the email is verified
+        final userResponse = await dio.get(
+          '$baseUrl/auth/login/', // Correct endpoint for user details
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          ),
+        );
+
+        // Check for a valid response and print user data for debugging
+        if (userResponse.statusCode == 200) {
+          print("User Data: ${userResponse.data}");
+
+          // Check email verification status
+          if (userResponse.data['is_email_verified'] == true) {
+            Get.off(() => const NavigationMenu());
+          } else {
+            Get.off(() => VerifyEmailScreen(email: userResponse.data['email']));
+          }
+        } else {
+          // Handle cases where the user response is not successful
+          Get.off(() => const LoginScreen());
+        }
       } else {
-        // Handle invalid credentials or errors
-        throw Exception('Login failed. Please check your email and password.');
+        // No access token, navigate to login screen
+        Get.off(() => const LoginScreen());
       }
     } catch (e) {
-      // Handle general errors
-      throw Exception('An error occurred while logging in: $e');
+      // Error handling (network issues, etc.)
+      print("Error in screen redirect: $e");
+      Get.off(() => const LoginScreen());
     }
   }
 
-  /// Function to register a new user
-  Future<void> registerWithEmailAndPassword(
-      String email, String password, String username) async {
-    try {
-      final response = await dio.post(
-        '$baseUrl/authentication/register/',
-        data: {
-          'email': email,
-          'password': password,
-          'username': username,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ),
-      );
-
-      if (response.statusCode == 201) {
-        // Registration successful, auto-login or navigate to login
-        Get.offAll(() => const LoginScreen());
-      } else {
-        throw Exception('Registration failed. Please try again.');
-      }
-    } catch (e) {
-      throw Exception('An error occurred during registration: $e');
-    }
-  }
-
-  /// Called from main.dart on app launch
   @override
   void onReady() {
+    // Remove splash screen and handle redirection
     FlutterNativeSplash.remove();
+    screenRedirect();
     super.onReady();
   }
 
-  /// Function to request password reset
-  Future<void> sendPasswordResetEmail(String email) async {
-    try {
-      final response = await dio.post(
-        '$baseUrl/authentication/password/reset/',
-        data: {
-          'email': email,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        // Notify user that the email has been sent
-        Get.snackbar('Success', 'Password reset email sent successfully');
-      } else {
-        throw Exception('Failed to send password reset email');
-      }
-    } catch (e) {
-      throw Exception('An error occurred: $e');
-    }
-  }
-
-  /// Function to verify email (if required by your backend)
-  Future<void> verifyEmail(String token) async {
-    try {
-      final response = await dio.post(
-        '$baseUrl/authentication/verify-email/',
-        data: {
-          'token': token,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        Get.snackbar('Success', 'Email verified successfully');
-      } else {
-        throw Exception('Email verification failed');
-      }
-    } catch (e) {
-      throw Exception('An error occurred: $e');
-    }
-  }
-
-
-  /// logout user
+  /// Logout functionality
   Future<void> logout() async {
     try {
-      final dio = Dio();
+      final prefs = await SharedPreferences.getInstance();
+      final refreshToken = prefs.getString('refresh_token');
 
-      // Replace with your Django logout endpoint
+      // Check if refresh token is available
+      if (refreshToken == null) {
+        // No refresh token available, force logout and redirect to login
+        await _forceLogout(prefs);
+        return;
+      }
+
+      // Attempt to send a logout request to the server
       final response = await dio.post(
-        'http://127.0.0.1:8000/authentication/logout/',
+        '$baseUrl/authentication/logout/',
+        data: {'refresh': refreshToken},
         options: Options(
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${prefs.getString('access_token')}',
           },
         ),
       );
 
-      if (response.statusCode == 200) {
-        // Successfully logged out
+      // If the server responds successfully, clear the tokens and navigate to login
+      if (response.statusCode == 204) {
+        await _clearTokens(prefs);
         Get.offAll(() => const LoginScreen());
       } else {
-        // Handle server errors
-        final error = response.data;
-        throw Exception(error['detail'] ?? 'Failed to logout');
+        // If the server responds with an error status, throw an exception
+        throw Exception('Failed to logout: ${response.statusCode}');
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception(e.response?.data['detail'] ?? 'Failed to logout');
-      } else {
-        throw Exception("Something went wrong, please try again");
-      }
-    } on FormatException catch (_) {
-      throw const TFormatException();
-    } on PlatformException catch (e) {
-      throw TPlatformException(e.code).message;
     } catch (e) {
-      throw Exception("Something went wrong, please try again");
+      // If an error occurs (network error, missing token, etc.), force logout
+      print('Logout error: $e');
+      await _forceLogout(await SharedPreferences.getInstance());
     }
   }
+
+  /// Clear tokens and redirect to login
+  Future<void> _clearTokens(SharedPreferences prefs) async {
+    await prefs.remove('access_token');
+    await prefs.remove('refresh_token');
+  }
+
+  /// Force logout and redirect to login in case of missing tokens or other issues
+  Future<void> _forceLogout(SharedPreferences prefs) async {
+    await _clearTokens(prefs);
+    Get.offAll(() => const LoginScreen());
+  }
+
 }

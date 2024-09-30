@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../../../utils/constants/colors.dart';
-import '../../../main/course_details/course_details.dart';
+
+import '../../../../../utils/constants/colors.dart';
+import '../../../../main/screens/course_details/course_details.dart';
+
 
 class CourseCardRow extends StatelessWidget {
   const CourseCardRow({

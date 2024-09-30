@@ -3,12 +3,12 @@ import 'package:edify/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'features/main/screens/home_page/home_page.dart';
+import 'features/main/screens/shorts/shorts.dart';
+import 'features/main/screens/wishlist/wishlist.dart';
+import 'features/personalization/screens/account/account_page.dart';
+import 'features/personalization/screens/notification/notification_page.dart';
 
-import 'features/main/home_page/home_page.dart';
-import 'features/main/shorts/shorts.dart';
-import 'features/main/wishlist/wishlist.dart';
-import 'features/personalization/account/account_page.dart';
-import 'features/personalization/notification/notification_page.dart';
 
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});

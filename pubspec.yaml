@@ -27,6 +27,8 @@ dependencies:
   stacked: ^2.1.7
   cached_network_image: ^3.0.0
   dio: ^5.7.0
+  flutter_swiper_null_safety: ^1.0.2
+  web_socket_channel: ^3.0.1
 
 
 
@@ -44,7 +46,18 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   lottie: ^3.1.2
   connectivity_plus: ^6.0.5
+  shared_preferences: ^2.3.2
 
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#272727"
+  android_12:
+    image: assets/logos/t-store-splash-logo-black.png
+    image_dark: assets/logos/t-store-splash-logo-black.png
+  android: true
+  ios: true
+  web: false
 
 
   #--------------- ./ PACKAGES END ------------------#
