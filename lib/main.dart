@@ -8,12 +8,13 @@ import 'app.dart';
 import 'data/repositories/authentication/authentication_repository.dart';
 import 'data/repositories/user/user_repository.dart';
 import 'features/authentication/controller/signup/signup_controller.dart';
-import 'features/main/controller/posts/posts_controller.dart';
+
 import 'features/personalization/controllers/user_controller.dart'; // Import UserRepository
 
 Future<void> main() async {
   /// Add Widgets Binding
-  final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  final WidgetsBinding widgetsBinding =
+      WidgetsFlutterBinding.ensureInitialized();
 
   /// Init Local Storage
   await GetStorage.init();
@@ -29,5 +30,15 @@ Future<void> main() async {
   Get.put(UserRepository()); // User repository initialization
 
   // Start the app
-  runApp(App());
+  runApp(const App());
 }
+
+
+
+/*
+id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    
+    
+*/

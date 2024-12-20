@@ -1,3 +1,12 @@
+import 'dart:ffi';
+
+import 'package:edify/features/main/models/post_model.dart';
+import 'package:edify/features/main/screens/home_page/home_page.dart';
+import 'package:edify/features/main/screens/posts/post_widget.dart';
+import 'package:edify/features/main/screens/report/report.dart';
+import 'package:edify/features/main/screens/shorts/add_short/add_short.dart';
+import 'package:edify/features/main/screens/shorts/shorts.dart';
+import 'package:edify/test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
@@ -61,7 +70,7 @@ class AuthenticationRepository extends GetxController {
         }
       } else {
         // No access token, navigate to login screen
-        Get.off(() => const LoginScreen());
+        Get.off(() => HomeScreen());
       }
     } catch (e) {
       // Error handling (network issues, etc.)
@@ -129,5 +138,4 @@ class AuthenticationRepository extends GetxController {
     await _clearTokens(prefs);
     Get.offAll(() => const LoginScreen());
   }
-
 }

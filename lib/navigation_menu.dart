@@ -9,7 +9,6 @@ import 'features/main/screens/wishlist/wishlist.dart';
 import 'features/personalization/screens/account/account_page.dart';
 import 'features/personalization/screens/notification/notification_page.dart';
 
-
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});
 
@@ -70,7 +69,7 @@ class NavigationController extends GetxController {
   final screens = [
     const HomeScreen(),
     const WishlistScreen(),
-    ShortsPage(),
+    const ShortVideo(),
     const NotificationsScreen(),
     const AccountScreen(),
   ];

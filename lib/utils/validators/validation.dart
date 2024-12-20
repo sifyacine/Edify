@@ -1,4 +1,3 @@
-
 class TValidator {
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -61,4 +60,14 @@ class TValidator {
   static validateEmptyText(String s, String? value) {}
 
 // Add more custom validators as needed for your specific requirements.
+
+  static validateShortTitle(String value, int min, int max) {
+    if (value.isEmpty) {
+      return "can't be empty";
+    } else if (value.length > max) {
+      return "can't be more than ${max.toString()}";
+    } else if (value.length < min) {
+      return "can't be less than ${min.toString()}";
+    }
+  }
 }
