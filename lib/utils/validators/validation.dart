@@ -62,6 +62,7 @@ class TValidator {
 // Add more custom validators as needed for your specific requirements.
 
   static validateShortTitle(String value, int min, int max) {
+    value.trim();
     if (value.isEmpty) {
       return "can't be empty";
     } else if (value.length > max) {

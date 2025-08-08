@@ -3,11 +3,9 @@ import 'package:edify/features/main/screens/posts/post_widget.dart';
 import 'package:edify/features/main/screens/shorts/add_short/widgets/add_hashtag.dart';
 import 'package:edify/test_page_controller.dart';
 import 'package:edify/utils/constants/colors.dart';
+import 'package:get/get.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:like_button/like_button.dart';
-import 'package:lottie/lottie.dart';
 
 class TestPage extends StatelessWidget {
   const TestPage({super.key});

@@ -9,11 +9,11 @@ class TLoaders {
   static hideSnackBar() =>
       ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
 
-  static customToast({required message}) {
+  static customToast({required message, required duration}) {
     ScaffoldMessenger.of(Get.context!).showSnackBar(
       SnackBar(
         elevation: 0,
-        duration: const Duration(seconds: 0),
+        duration: duration,
         backgroundColor: Colors.transparent,
         content: Container(
           padding: const EdgeInsets.all(12.0),
@@ -69,5 +69,74 @@ class TLoaders {
         duration: Duration(seconds: duration),
         margin: const EdgeInsets.all(20),
         icon: const Icon(Iconsax.warning_2, color: TColors.white));
+  }
+
+  // success dialog
+  static successDialog(String message) {
+    Get.dialog(Card(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.check_circle_outline,
+            color: TColors.primary,
+            size: 64,
+          ),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontFamily: "TiltNeon", fontSize: 20),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text(
+                'cancel',
+                style: TextStyle(color: TColors.primary, fontSize: 16),
+              ))
+        ],
+      ),
+    ));
+  }
+
+  // error dialog
+  static errorDialog(String message) {
+    Get.dialog(Card(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error,
+            color: Colors.red,
+            size: 64,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontFamily: "TiltNeon", fontSize: 20),
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          TextButton(
+              onPressed: () {
+                print(message);
+                Get.back();
+              },
+              child: const Text(
+                'cancel',
+                style: TextStyle(
+                    color: Colors.red, fontFamily: "TiltNeon", fontSize: 16),
+              ))
+        ],
+      ),
+    ));
   }
 }

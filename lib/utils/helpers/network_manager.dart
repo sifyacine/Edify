@@ -10,21 +10,23 @@ class NetworkManager extends GetxController {
 
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
-  final RxList<ConnectivityResult> _connectionStatus = <ConnectivityResult>[].obs;
+  final RxList<ConnectivityResult> _connectionStatus =
+      <ConnectivityResult>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
     _connectionStatus.value = result;
     if (result.contains(ConnectivityResult.none)) {
-      TLoaders.customToast(message: 'No Internet Connection');
+      TLoaders.customToast(
+          message: 'No Internet Connection', duration: Duration(seconds: 5));
     }
   }
-
 
   Future<bool> isConnected() async {
     try {
