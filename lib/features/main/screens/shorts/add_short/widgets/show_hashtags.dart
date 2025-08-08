@@ -22,12 +22,15 @@ class ShowHashtags extends StatelessWidget {
           onTap: () {
             controller.removeHashtag(index);
           },
-          child: Card(
-            color: TColors.primary,
-            child: Text(
-              textAlign: TextAlign.center,
-              " # ${hashtags![index]}",
-              style: const TextStyle(color: Colors.black),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Card(
+              color: Colors.blue[200],
+              child: Text(
+                textAlign: TextAlign.center,
+                " # ${hashtags![index]}",
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
           ),
         );

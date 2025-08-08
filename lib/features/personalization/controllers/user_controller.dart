@@ -64,7 +64,8 @@ class UserController extends GetxController {
         );
       }
     } catch (e, stackTrace) {
-      print("Error fetching user record: $e");
+      // Handle any errors that occur during the fetch
+      print("Error fetching user data: $e");
       print("Stack trace: $stackTrace");
 
       TLoaders.errorSnackBar(

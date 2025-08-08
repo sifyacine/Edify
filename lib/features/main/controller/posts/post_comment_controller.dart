@@ -4,6 +4,7 @@ import 'package:edify/utils/dio/dio_client.dart';
 import 'package:edify/utils/helpers/network_manager.dart';
 import 'package:edify/utils/loaders/loaders.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -84,20 +85,23 @@ class PostCommentControllerImp extends PostCommentController {
             : [];
       } else if (response.statusCode == 400) {
         comments = [].obs;
-        TLoaders.customToast(message: "Can't get comments");
+        TLoaders.customToast(
+            message: "Can't get comments", duration: Duration(seconds: 5));
       } else {
         TLoaders.errorSnackBar(
             title: 'Server Error',
             message: "Server Error 404 , Please Try Again");
       }
     } else {
-      TLoaders.customToast(message: "Check Your Network");
+      TLoaders.customToast(
+          message: "Check Your Network", duration: Duration(seconds: 5));
     }
     isLoading.value = false;
   }
 
   @override
   addComment(int postID, int? parentID, int userID) async {
+    if (isLoading.value) return;
     isAddingCommnet.value = true;
     try {
       final isConnected = await NetworkManager.instance.isConnected();
@@ -211,6 +215,22 @@ class PostCommentControllerImp extends PostCommentController {
                       child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
+                      maxLines: 1,
+                      minLines: 1,
+                      maxLength: 255,
+                      buildCounter: (
+                        BuildContext context, {
+                        required int currentLength,
+                        required bool isFocused,
+                        required int? maxLength,
+                      }) {
+                        return null; // إخفاء العداد
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(
+                          RegExp(r'''[!\$^*\\[\]{}|\\:;"\'<>/]'''),
+                        ),
+                      ],
                       decoration: InputDecoration(
                         hintText: " Add a Reply to @$memberFullName ...",
                         hintStyle:
@@ -247,9 +267,9 @@ class PostCommentControllerImp extends PostCommentController {
   @override
   String formatNumber(int number) {
     if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(2)}M';
+      return '${(number / 1000000).toStringAsFixed(2)} M';
     } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(2)}K';
+      return '${(number / 1000).toStringAsFixed(2)} K';
     } else {
       return number.toString();
     }

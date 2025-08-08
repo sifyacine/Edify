@@ -1,13 +1,8 @@
-import 'dart:ffi';
-
-import 'package:edify/features/main/models/post_model.dart';
 import 'package:edify/features/main/screens/home_page/home_page.dart';
-import 'package:edify/features/main/screens/posts/post_widget.dart';
-import 'package:edify/features/main/screens/report/report.dart';
+import 'package:edify/features/main/screens/home_page/widgets/shorts/shorts.dart';
+import 'package:edify/features/main/screens/menu/my_courses/my_courses.dart';
 import 'package:edify/features/main/screens/shorts/add_short/add_short.dart';
 import 'package:edify/features/main/screens/shorts/shorts.dart';
-import 'package:edify/test.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -18,8 +13,6 @@ import '../../../features/authentication/screens/onboarding/onboarding_screen.da
 import '../../../features/authentication/screens/signin/signin_screen.dart';
 import '../../../features/authentication/screens/signup/verify_email.dart';
 import '../../../navigation_menu.dart';
-import '../../../utils/exceptions/format_exceptions.dart';
-import '../../../utils/exceptions/platform_exceptions.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -70,7 +63,7 @@ class AuthenticationRepository extends GetxController {
         }
       } else {
         // No access token, navigate to login screen
-        Get.off(() => HomeScreen());
+        Get.off(() => HomePage());
       }
     } catch (e) {
       // Error handling (network issues, etc.)

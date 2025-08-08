@@ -4,12 +4,18 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../../utils/constants/colors.dart';
-import '../../../../main/screens/course_details/course_details.dart';
-
+import '../../../../main/screens/courses/course_details/course_details.dart';
 
 class CourseCardRow extends StatelessWidget {
   const CourseCardRow({
-  super.key, required this.thumbnail, required this.title, required this.instructor, this.rating = 0, required this.price, this.promo = 0, this.rateNum = 0,
+    super.key,
+    required this.thumbnail,
+    required this.title,
+    required this.instructor,
+    this.rating = 0,
+    required this.price,
+    this.promo = 0,
+    this.rateNum = 0,
   });
   final String thumbnail;
   final String title;
@@ -23,7 +29,7 @@ class CourseCardRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => const CourseDetails());
+        //Get.to(() => const CourseDetails());
       },
       child: Container(
         decoration: BoxDecoration(
@@ -61,7 +67,8 @@ class CourseCardRow extends StatelessWidget {
                   const SizedBox(height: 8.0),
                   Row(
                     children: [
-                      const Icon(Iconsax.verify5, size: 16.0, color: TColors.primary),
+                      const Icon(Iconsax.verify5,
+                          size: 16.0, color: TColors.primary),
                       const SizedBox(width: 4.0),
                       Text(
                         instructor,

@@ -9,11 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AddShort extends StatelessWidget {
-  const AddShort({super.key});
+  final int userId;
+  const AddShort({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
-    AddShortControllerImp controller = Get.put(AddShortControllerImp());
+    AddShortControllerImp controller = Get.put(AddShortControllerImp(userId));
     return Scaffold(
         appBar: AppBar(
           title: const Row(

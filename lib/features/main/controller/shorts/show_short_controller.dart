@@ -1,30 +1,63 @@
 import 'package:better_player/better_player.dart';
 import 'package:dio/dio.dart';
-import 'package:edify/features/main/screens/shorts/widgets/comments.dart';
 import 'package:edify/utils/dio/dio_client.dart';
-import 'package:edify/utils/helpers/network_manager.dart';
-import 'package:edify/utils/loaders/loaders.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:like_button/like_button.dart';
 import 'package:video_player/video_player.dart';
 
 abstract class ShowShortController extends GetxController {
-  initData();
-  getShortVideos();
-  likeVideo(index, i);
-  increaseWithDecreaseLike(int currentLikes, i);
-  getComments(int shortVideoID, int index);
-  checkVolumeVideo();
-  loadVideos();
-  changeVideo(index);
+  initlizingVideos();
+  getShorts();
+  preLoading(int index);
 }
 
 class ShowShortControllerImp extends ShowShortController {
   Dio dio = Dio();
 
-  RxDouble uploadProgress = 0.0.obs;
+  RxList videoPlayerControllers = [].obs;
+
+  RxList shorts = [
+    "https://education15845d.pythonanywhere.com/media/upload/25/03/23/video.mp4",
+    "https://media.istockphoto.com/id/2162665170/video/robotic-vision-concept-in-a-warehouse-workers-managing-inventory-at-logistics-center.mp4?s=mp4-640x640-is&k=20&c=vKypq-bjltrOuQ77fTz5c6kmbVWXlvFjQPap1CIPGb4=",
+    "https://education15845d.pythonanywhere.com/media/upload/25/03/28/video_vaiEOiN.mp4",
+    "https://media.istockphoto.com/id/480098682/video/sales-growth.mp4?s=mp4-640x640-is&k=20&c=RIsjCbH3NGgiSsLWaTRBK9tk0zkxTG3v0QsITvREKvE="
+  ].obs;
+  // constroller
+  @override
+  void onInit() {
+    initlizingVideos();
+
+    super.onInit();
+  }
+
+  @override
+  initlizingVideos() async {
+    for (String short in shorts) {
+      videoPlayerControllers
+          .add(VideoPlayerController.networkUrl(Uri.parse(short)));
+    }
+    videoPlayerControllers[0].initialize();
+  }
+
+  @override
+  getShorts() async {
+    var response = await TDioHelper.post(
+        "https://education15845d.pythonanywhere.com/shortvideo/readall/",
+        {},
+        0.0.obs);
+  }
+
+  @override
+  preLoading(int index) {
+    videoPlayerControllers[index + 1].initialize();
+  }
+}
+
+/*  RxDouble uploadProgress = 0.0.obs;
   RxBool showReply = false.obs;
   RxList shorts = [].obs;
   RxBool pause = false.obs;
@@ -212,5 +245,4 @@ class ShowShortControllerImp extends ShowShortController {
       TLoaders.warningSnackBar(title: "Error", message: "Server Error 400");
     }
     isLoading.value = false;
-  }
-}
+  }*/

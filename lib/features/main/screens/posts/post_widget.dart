@@ -4,10 +4,10 @@ import 'package:edify/features/main/screens/posts/show_post_image.dart';
 import 'package:edify/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 
 import 'package:readmore/readmore.dart';
-import 'dart:math' as math;
 
 class PostView extends StatelessWidget {
   final String memberPic;
@@ -55,60 +55,62 @@ class PostView extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundImage: NetworkImage(memberPic),
-              radius: 20.0,
-            ),
-            const SizedBox(width: 12.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        memberFullName,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      InkWell(
-                          onTap: onTapFollow,
-                          child: const Text(
-                            'Follow',
-                            style: TextStyle(color: Colors.purple),
-                          ))
-                    ],
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    postTime,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.grey),
-                  ),
-                ],
+        Padding(
+          padding: const EdgeInsets.only(right: 5, left: 5),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(memberPic),
+                radius: 20.0,
               ),
-            ),
-            InkWell(
-              onTap: postReport,
-              child: InkWell(
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          memberFullName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: "NotoSansArabic"),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        InkWell(
+                            onTap: onTapFollow,
+                            child: const Text(
+                              'Follow',
+                              style: TextStyle(
+                                  color: Colors.purple,
+                                  fontFamily: "NotoSansArabic"),
+                            ))
+                      ],
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      postTime,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey, fontFamily: "NotoSansArabic"),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
                   onTap: postReport,
                   child: const Icon(
                     Icons.more_vert,
                     color: Colors.black,
                     size: 20,
-                  )),
-            )
-          ],
+                  ))
+            ],
+          ),
         ),
         const SizedBox(
           height: 10,
@@ -116,17 +118,22 @@ class PostView extends StatelessWidget {
         SizedBox(
           width: Get.width,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: ReadMoreText(
               postTitle,
               trimLines: 2, // عدد الأسطر قبل ظهور زر "قراءة المزيد"
               trimMode: TrimMode.Line,
               trimCollapsedText: 'Read More',
               trimExpandedText: 'Read Less',
-              style: const TextStyle(color: Colors.black),
-              moreStyle: const TextStyle(color: TColors.primary),
-              lessStyle:
-                  const TextStyle(color: Color.fromARGB(255, 173, 172, 172)),
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 15,
+                  fontFamily: "NotoSansArabic"),
+              moreStyle: const TextStyle(
+                  color: TColors.primary, fontFamily: "NotoSansArabic"),
+              lessStyle: const TextStyle(
+                  color: Color.fromARGB(255, 173, 172, 172),
+                  fontFamily: "NotoSansArabic"),
             ),
           ),
         ),
@@ -182,7 +189,8 @@ class PostView extends StatelessWidget {
                                       child: Text(
                                         "${i + 1} / ${images.length}",
                                         style: const TextStyle(
-                                            color: Colors.white),
+                                            color: Colors.white,
+                                            fontFamily: "NotoSansArabic"),
                                       ),
                                     )),
                           ],
@@ -208,7 +216,7 @@ class PostView extends StatelessWidget {
           height: 10,
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Row(
               children: [likeWidget, const Text('Like')],
@@ -220,15 +228,11 @@ class PostView extends StatelessWidget {
             Row(
               children: [
                 InkWell(
-                  onTap: onTapShare,
-                  child: Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.rotationY(math.pi),
-                    child: const Icon(
-                      Icons.reply_rounded,
-                    ),
-                  ),
-                ),
+                    onTap: onTapShare,
+                    child: Icon(
+                      Iconsax.share,
+                      size: 20,
+                    )),
                 const Text(' Share')
               ],
             ),

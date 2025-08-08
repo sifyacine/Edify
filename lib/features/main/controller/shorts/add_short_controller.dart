@@ -30,6 +30,9 @@ abstract class AddShortController extends GetxController {
 }
 
 class AddShortControllerImp extends AddShortController {
+  int userId;
+  AddShortControllerImp(this.userId);
+
   XFile? shortVideo;
   RxBool isInitialVideo = false.obs;
 
@@ -106,7 +109,8 @@ class AddShortControllerImp extends AddShortController {
           "https://education15845d.pythonanywhere.com/shortvideo/create/",
           {
             'short_title': titleController.value.text,
-            'member': 2.toString(),
+            'member': userId,
+            'member_id': userId,
             'hashtags': hashtags.value,
             'short_video': await dio.MultipartFile.fromFile(
               compressedVideo!.file!.path,
@@ -118,12 +122,11 @@ class AddShortControllerImp extends AddShortController {
 
         if (response.statusCode == 201) {
           isPublish.value = true;
-          print(response.statusCode);
+
           TLoaders.successSnackBar(
               title: "Success", message: "Video was been uploaded");
           Get.off(() => const ShortVideo());
         } else {
-          print(response.statusCode);
           publishError.value = true;
           isPublish.value = false;
 
@@ -134,14 +137,13 @@ class AddShortControllerImp extends AddShortController {
         isPublish.value = false;
 
         update();
-        TLoaders.errorSnackBar(
-            title: "Lost connection", message: "there is not internet");
+        TLoaders.errorDialog("there is not internet");
       }
     } catch (e) {
       publishError.value = true;
 
       isPublish.value = false;
-      TLoaders.errorSnackBar(title: "Error", message: "Server Error 404");
+      TLoaders.errorDialog("Server Error 404 \n errore");
       Get.back();
     }
     isPulishing.value == false;
@@ -191,10 +193,11 @@ class AddShortControllerImp extends AddShortController {
         shortVideo!.path,
         quality: VideoQuality.MediumQuality,
       );
+
       isCompress.value = true;
     } catch (e) {
+      compressedVideo = shortVideo;
       isCompress.value = false;
-      TLoaders.errorSnackBar(title: 'error : $e');
     }
     isCompressing.value = false;
   }

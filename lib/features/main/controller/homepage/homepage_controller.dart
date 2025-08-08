@@ -1,4 +1,14 @@
-import 'package:dio/dio.dart';
+
+import 'package:dio/dio.dart' as dio;
+import 'package:edify/features/main/models/course/courseDetails.dart';
+import 'package:edify/features/main/screens/home_page/home_page.dart';
+import 'package:edify/features/main/screens/home_page/widgets/add/add.dart';
+import 'package:edify/features/main/screens/home_page/widgets/groups/groups.dart';
+import 'package:edify/features/main/screens/home_page/widgets/home/home.dart';
+import 'package:edify/features/main/screens/home_page/widgets/home/home_courses/courses.dart';
+import 'package:edify/features/main/screens/home_page/widgets/menu/menu.dart';
+import 'package:edify/features/main/screens/home_page/widgets/shorts/shorts.dart';
+import 'package:edify/features/main/screens/shorts/shorts.dart';
 import 'package:edify/utils/dio/dio_client.dart';
 import 'package:edify/utils/helpers/network_manager.dart';
 import 'package:edify/utils/loaders/loaders.dart';
@@ -8,33 +18,48 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 abstract class HomePageController extends GetxController {
+  // posts
   getPosts();
   likeDislikePost(id, int i);
-
   formatNumber(int number);
-
   savePost(int i, int post, int member);
+  // courses
+  getCourses();
+  changePage(int index);
 }
 
 class HomePageControllerImp extends HomePageController {
+  // Navigator bar items
+  List pages = [
+    const Home(),
+    const ShortVideo(),
+    const Add(),
+    const Groups(),
+    const Menu()
+  ];
+  RxInt currentPage = 0.obs;
+
   int userID = 2;
+  // posts
   int currentPostID = 0;
   int index = 0;
   RxList posts = [].obs;
   RxBool isLoading = false.obs;
   List<RxBool> isSavePost = [];
   List<RxBool> likePosts = [];
-
   GetStorage box = GetStorage();
-
   List<int> currentLikePost = [];
-
   RxInt currentLike = 0.obs;
-  Dio dio = Dio();
+  // courses
+  RxList courses = [].obs;
+  RxBool isLoadingCourses = false.obs;
+
   ScrollController scrollController = ScrollController();
+
   @override
   void onInit() async {
-    await getPosts();
+    //await getPosts();
+    //await getCourses();
 
     super.onInit();
   }
@@ -127,9 +152,10 @@ class HomePageControllerImp extends HomePageController {
     try {
       var isConnected = await NetworkManager.instance.isConnected();
       if (isConnected) {
-        var response = await dio.post(
+        var response = await TDioHelper.post(
             "https://education15845d.pythonanywhere.com/post/savepost/",
-            data: {"post": post, "member": member});
+            {"post": post, "member": member},
+            0.0.obs);
         if (response.statusCode == 200) {}
       } else {
         TLoaders.errorSnackBar(title: "Network", message: "Check your network");
@@ -137,5 +163,33 @@ class HomePageControllerImp extends HomePageController {
     } catch (e) {
       print(e);
     }
+  }
+
+  // ------------------------------- courses -----------------------------------
+  @override
+  getCourses() async {
+    try {
+      var isConnected = await NetworkManager.instance.isConnected();
+      if (isConnected) {
+        isLoadingCourses.value = true;
+        dio.Response response = await TDioHelper.post(
+            "https://education15845d.pythonanywhere.com/courses/readall/",
+            {"member": userID},
+            0.0.obs);
+        if (response.statusCode == 200) {
+          courses.addAll(response.data["results"]);
+        }
+        isLoadingCourses.value = false;
+      } else {
+        TLoaders.errorDialog("No Internt");
+      }
+    } catch (e) {
+      TLoaders.errorDialog(e.toString());
+    }
+  }
+
+  @override
+  changePage(int index) {
+    currentPage.value = index;
   }
 }

@@ -1,143 +1,162 @@
 import 'package:better_player/better_player.dart';
-import 'package:edify/features/main/controller/shorts/show_short_controller.dart';
+import 'package:edify/features/main/controller/homepage/shorts/shorts_controller.dart';
+
 import 'package:edify/features/main/screens/shorts/widgets/bottomPart.dart';
+import 'package:edify/features/main/screens/shorts/widgets/comment_short.dart';
+
 import 'package:edify/features/main/screens/shorts/widgets/rightPart.dart';
 import 'package:edify/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:like_button/like_button.dart';
 import 'package:lottie/lottie.dart';
+
 import 'package:video_player/video_player.dart';
 
-class ShortVideo extends StatelessWidget {
+class ShortVideo extends StatefulWidget {
   const ShortVideo({super.key});
 
   @override
+  State<ShortVideo> createState() => _ShortVideoState();
+}
+
+class _ShortVideoState extends State<ShortVideo>
+    with AutomaticKeepAliveClientMixin {
+  ShortsControllerImp controller = Get.put(ShortsControllerImp());
+  @override
   Widget build(BuildContext context) {
-    ShowShortControllerImp controller = Get.put(ShowShortControllerImp());
-
     return Scaffold(
-        body: Obx(
-      () => controller.shorts.isEmpty
-          ? Center(
-              child: Lottie.asset(
-                  "assets/images/animations/141397-loading-juggle.json"),
-            )
-          : PageView.builder(
-              onPageChanged: (index) async {
-                controller.changeVideo(index);
-              },
-              scrollDirection: Axis.vertical,
-              itemCount: controller.videoPlayerControllers.length,
-              itemBuilder: (context, i) {
-                controller.currentIndex.value = i;
-                final videoController = controller.videoPlayerControllers[i];
-                videoController.setLooping(true);
+        body: Obx(() => controller.isLoading.value
+            ? Center(
+                child: Lottie.asset(
+                "assets/images/animations/loading3.json",
+                width: 200,
+                height: 200,
+              ))
+            : controller.shorts.isNotEmpty
+                ? PageView.builder(
+                    controller: controller.scrollController,
+                    scrollDirection: Axis.vertical,
+                    itemCount: controller.shorts.length,
+                    onPageChanged: (index) {
+                      controller.onPageChanged(index);
 
-                videoController.play();
-
-                return Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: InkWell(
-                        onTap: () {
-                          if (controller.playing.value) {
-                            controller.playing.value = false;
-                            videoController.pause();
-                          } else {
-                            controller.playing.value = true;
-                            videoController.play();
-                          }
-                        },
-                        child: VideoPlayer(videoController),
-                      ),
-                    ),
-                    // باقي عناصر الواجهة كـ BottomPartShortView و RightPart
-                    Positioned(
-                      bottom: 20,
-                      left: 10,
-                      child: BottomPartShortView(
-                        title: ' ${controller.shorts[i]['short_title']}',
-                        memberFullName:
-                            '${controller.shorts[i]['member']['full_name']}',
-                        memerPhotoProfil: 'assets/logos/google-icon.png',
-                      ),
-                    ),
-                    Positioned(
-                        right: 20,
-                        bottom: Get.width / 4,
-                        child: Obx(
-                          () => Rightpart(
-                            soundControl: InkWell(
-                              onTap: () {
-                                if (controller.volume.value) {
-                                  controller.volume.value = false;
-                                  videoController.setVolume(0.0);
-                                } else {
-                                  controller.volume.value = true;
-                                  videoController.setVolume(1.0);
-                                }
-                              },
-                              child: controller.checkVolumeVideo(),
-                            ),
-                            memerPhotoProfil: 'assets/logos/google-icon.png',
-                            shortLikes: controller
-                                .increaseWithDecreaseLike(
-                                    controller.shorts[i]['short_likes'], i)
-                                .toString(),
-                            shortComments:
-                                '${controller.shorts[i]['short_comments']}',
-                            comment: () async {
-                              await controller.getComments(
-                                  controller.shorts[i]['id'], i);
-                            },
-                            share: () {},
-                            save: () {},
-                            like: LikeButton(
-                              circleColor: const CircleColor(
-                                  start: TColors.primary, end: Colors.red),
-                              isLiked: controller.likesVideo[i].value,
-                              onTap: (val) async {
-                                return await controller.likeVideo(
-                                    '${controller.shorts[i]['id']}', i);
-                              },
-                              likeBuilder: (bool isLiked) {
-                                return Icon(
-                                  Icons.favorite,
-
-                                  size: controller.isLiked.value ? 40 : 32,
-                                  color: controller.likesVideo[i].value
-                                      ? Colors.red
-                                      : Colors
-                                          .white, // هنا نغير اللون إلى الأبيض
-                                );
-                              },
-                            ),
-                          ),
-                        )),
-                    Positioned(
-                      bottom: 0,
-                      child: SizedBox(
-                        width: Get.width,
-                        child: VideoProgressIndicator(
-                          videoController,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: TColors.primary,
-                            backgroundColor: Color.fromARGB(144, 241, 241, 241),
-                            bufferedColor: Color.fromARGB(197, 255, 255, 255),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-    ));
+                      if (index - 1 >= 0 &&
+                          index + 1 <= controller.shorts.length) {
+                        controller.videosController[index - 1].pause();
+                        controller.videosController[index].play();
+                      }
+                    },
+                    itemBuilder: (BuildContext context, int i) {
+                      Map shorts = controller.shorts[i];
+                      return InkWell(
+                          onTap: () async {
+                            controller.pausePlayVideo(i);
+                          },
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                top: 0,
+                                bottom: 0,
+                                right: 0,
+                                left: 0,
+                                child: AspectRatio(
+                                    aspectRatio: 9 / 16,
+                                    child: VideoPlayer(
+                                        controller.videosController[i])),
+                              ),
+                              Positioned(
+                                right: 20,
+                                bottom: 80,
+                                child: Rightpart(
+                                    shortComments:
+                                        shorts["short_comments"].toString(),
+                                    comment: () async {
+                                      Get.to(() => CommentShort(
+                                            shortId: controller.shorts[i]['id'],
+                                          ));
+                                    },
+                                    share: () {},
+                                    save: InkWell(
+                                      onTap: () async {
+                                        controller.saveUnSaveShort(
+                                            controller.shorts[i]['id'],
+                                            shorts['is_saved']);
+                                        shorts['is_saved'] =
+                                            !shorts['is_saved'];
+                                        controller.shorts.refresh();
+                                      },
+                                      child: !shorts['is_saved']
+                                          ? const Icon(
+                                              Iconsax.save_add,
+                                              color: Colors.white,
+                                              size: 26,
+                                            )
+                                          : const Padding(
+                                              padding:
+                                                  EdgeInsets.only(left: 8.0),
+                                              child: Icon(Iconsax.save_21,
+                                                  color: TColors.primary,
+                                                  size: 30),
+                                            ),
+                                    ),
+                                    like: LikeButton(
+                                      isLiked: controller.shortsIsLiked[i],
+                                      likeBuilder: (isLike) {
+                                        return Icon(
+                                          isLike
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: isLike
+                                              ? const Color.fromARGB(
+                                                  255, 241, 30, 15)
+                                              : const Color.fromARGB(
+                                                  255, 255, 255, 255),
+                                          size: 34,
+                                        );
+                                      },
+                                      onTap: (isLiked) =>
+                                          controller.likeDislike(
+                                              controller.shorts[i]['id'], i),
+                                    ),
+                                    shortLikes: Obx(() => Text(
+                                          controller.shortsLikes[i].toString(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        )),
+                                    memerPhotoProfil:
+                                        "assets/images/content/user.png",
+                                    soundControl: Text("")),
+                              ),
+                              Positioned(
+                                  bottom: 20,
+                                  left: 10,
+                                  right: Get.width / 3.5,
+                                  child: BottomPartShortView(
+                                    title: shorts["short_title"],
+                                    memberFullName: shorts["member"]
+                                        ["full_name"],
+                                    hashtags: const [
+                                      "#edify",
+                                      "#younes tb",
+                                      "#math",
+                                      "#learn"
+                                    ],
+                                  ))
+                            ],
+                          ));
+                    })
+                : Center(
+                    child: Lottie.asset(
+                    "assets/images/animations/loading3.json",
+                    width: 200,
+                    height: 200,
+                  ))));
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

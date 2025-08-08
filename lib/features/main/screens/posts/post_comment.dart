@@ -1,12 +1,15 @@
 import 'package:edify/features/main/controller/posts/post_comment_controller.dart';
 import 'package:edify/features/main/screens/report/report.dart';
-import 'package:edify/features/main/screens/shorts/widgets/comments.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:like_button/like_button.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../../utils/constants/colors.dart';
+import 'widgets/view_comments.dart';
+import "package:timeago/timeago.dart" as timeago;
 
 class PostCommentView extends StatelessWidget {
   const PostCommentView({
@@ -69,71 +72,76 @@ class PostCommentView extends StatelessWidget {
                                   : controller.likeCommentsPost[i].value =
                                       false;
 
-                              return Obx(() => ViewComments(
-                                    commentReport: () async {
-                                      Get.to(() => const SendReport(),
-                                          arguments: {
-                                            "type":
-                                                "comment post ${controller.comments[i]['id'].toString()}",
-                                            "member": controller.comments[i]
-                                                ['member']['id'],
-                                            "userID": controller.userID,
-                                          });
-                                    },
-                                    commentTime: commentTime,
-                                    showReply: controller.showRepliesList[i],
-                                    commentsNumber: controller
-                                        .formatNumber(controller.commentNumber),
-                                    memberPic: 'assets/logos/google-icon.png',
-                                    memberFullName: controller.comments[i]
-                                        ['member']['full_name'],
-                                    content: controller.comments[i]['content'],
-                                    commentLike: LikeButton(
-                                      size: 20,
-                                      isLiked:
-                                          controller.likeCommentsPost[i].value,
-                                      onTap: (val) async {
-                                        if (controller
-                                            .likeCommentsPost[i].value) {
-                                          currentLike.value =
-                                              currentLike.value - 1;
-                                          controller.currentLikeComment[i] =
-                                              currentLike.value;
-                                          controller.comments[i]['is_liked'] =
-                                              false;
-                                        } else {
-                                          currentLike.value =
-                                              currentLike.value + 1;
+                              return Obx(() {
+                                DateTime dateTime = DateTime.parse(
+                                    controller.comments[i]['created_at']);
 
-                                          controller.currentLikeComment[i] =
-                                              currentLike.value;
-                                          controller.comments[i]['is_liked'] =
-                                              true;
-                                        }
+                                return ViewComments(
+                                  commentReport: () async {
+                                    Get.to(() => const SendReport(),
+                                        arguments: {
+                                          "type":
+                                              "comment post ${controller.comments[i]['id'].toString()}",
+                                          "member": controller.comments[i]
+                                              ['member']['id'],
+                                          "userID": controller.userID,
+                                        });
+                                  },
+                                  commentTime: dateTime,
+                                  showReply: controller.showRepliesList[i],
+                                  commentsNumber: controller
+                                      .formatNumber(controller.commentNumber),
+                                  memberPic: 'assets/logos/google-icon.png',
+                                  memberFullName: controller.comments[i]
+                                      ['member']['full_name'],
+                                  content: controller.comments[i]['content'],
+                                  commentLike: LikeButton(
+                                    size: 20,
+                                    isLiked:
+                                        controller.likeCommentsPost[i].value,
+                                    onTap: (val) async {
+                                      if (controller
+                                          .likeCommentsPost[i].value) {
+                                        currentLike.value =
+                                            currentLike.value - 1;
+                                        controller.currentLikeComment[i] =
+                                            currentLike.value;
+                                        controller.comments[i]['is_liked'] =
+                                            false;
+                                      } else {
+                                        currentLike.value =
+                                            currentLike.value + 1;
 
-                                        return await controller
-                                            .likeDislikePostComment(
-                                                controller.comments[i]['id'],
-                                                i,
-                                                controller.userID);
-                                      },
-                                    ),
-                                    commentlike: currentLike.value.toString(),
-                                    repliesNumber: controller
-                                        .comments[i]['replies'].length,
-                                    repley: () async {
-                                      controller.box.write("commentIndex", i);
-                                      controller.addRepleyCommentPost(
-                                          controller.comments[i]['member']
-                                              ['full_name'],
-                                          controller.postID,
-                                          controller.comments[i]['id'],
-                                          controller.userID);
+                                        controller.currentLikeComment[i] =
+                                            currentLike.value;
+                                        controller.comments[i]['is_liked'] =
+                                            true;
+                                      }
+
+                                      return await controller
+                                          .likeDislikePostComment(
+                                              controller.comments[i]['id'],
+                                              i,
+                                              controller.userID);
                                     },
-                                    showRepliesList: controller.showRepliesList,
-                                    i: i,
-                                    replies: controller.comments[i]['replies'],
-                                  ));
+                                  ),
+                                  commentlike: currentLike.value.toString(),
+                                  repliesNumber:
+                                      controller.comments[i]['replies'].length,
+                                  repley: () async {
+                                    controller.box.write("commentIndex", i);
+                                    controller.addRepleyCommentPost(
+                                        controller.comments[i]['member']
+                                            ['full_name'],
+                                        controller.postID,
+                                        controller.comments[i]['id'],
+                                        controller.userID);
+                                  },
+                                  showRepliesList: controller.showRepliesList,
+                                  i: i,
+                                  replies: controller.comments[i]['replies'],
+                                );
+                              });
                             }),
               ),
               Container(
@@ -154,8 +162,25 @@ class PostCommentView extends StatelessWidget {
                             child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
+                            maxLines: 1,
+                            minLines: 1,
+                            maxLength: 255,
+                            buildCounter: (
+                              BuildContext context, {
+                              required int currentLength,
+                              required bool isFocused,
+                              required int? maxLength,
+                            }) {
+                              return null; // إخفاء العداد
+                            },
+                            inputFormatters: [
+                              FilteringTextInputFormatter.deny(
+                                RegExp(r'''[!\$^*\\[\]{}|\\:;"\'<>/]'''),
+                              ),
+                            ],
                             decoration: InputDecoration(
                               hintText: " Add a comment ...",
+
                               hintStyle: TextStyle(
                                   color: Colors.grey[600], fontSize: 13),
                               border: InputBorder.none, // إزالة الحدود الأساسية
